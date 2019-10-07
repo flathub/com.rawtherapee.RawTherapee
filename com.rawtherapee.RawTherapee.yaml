@@ -199,6 +199,24 @@ modules:
         commands:
           - cp -p /usr/share/automake-*/config.{sub,guess} .;
 
+  - name: xmlstarlet
+    config-opts:
+      - --disable-static-libs
+      - --with-libxml-libs-prefix=/usr/lib
+      - --with-libxml-include-prefix=/usr/include/libxml2
+    sources:
+    # Source0
+      - type: archive
+        url: https://downloads.sourceforge.net/xmlstar/xmlstarlet-1.6.1.tar.gz
+        sha256: 15d838c4f3375332fd95554619179b69e4ec91418a3a5296e7c631b7ed19e7ca
+      - type: shell
+        commands:
+          - cp -p /usr/share/automake-*/config.{sub,guess} .;
+          - autoreconf -vfi;
+    post-install:
+      - ln -s "xml" "${FLATPAK_DEST}/bin/xmlstarlet" ||:;
+    cleanup: ["*"]
+
   - name: RawTherapee
     buildsystem: cmake-ninja
     builddir: true
@@ -211,3 +229,42 @@ modules:
       # https://github.com/Beep6581/RawTherapee/pull/5460
       - type: patch
         path: RawTherapee-5.7-xdg.patch
+      # Quote parameters correctly for Linux when spawning (#5463)
+      # https://github.com/Beep6581/RawTherapee/issues/5463
+      # https://github.com/Beep6581/RawTherapee/commit/5b72cc0dd3ce0288408ee0a1b0785f7c603a059e
+      - type: patch
+        path: RawTherapee-5.7-shell_quote.patch
+      # Fix launch of custom editor
+      # https://github.com/Beep6581/RawTherapee/issues/5472
+      # https://github.com/Beep6581/RawTherapee/pull/5473
+      # https://github.com/Beep6581/RawTherapee/pull/5473/commits/ca42b7b726f901c18153efd3206f1e4fe597b769
+      - type: patch
+        path: RawTherapee-5.7-custom-editor.patch
+      # Fix progress bar of invoking external editor
+      # https://github.com/Beep6581/RawTherapee/issues/5475
+      - type: patch
+        path: RawTherapee-5.7-progress-bar.patch
+      # Allow to use GIMP from the host as an external tool to edit photos
+      - type: script
+        commands:
+          - flatpak-spawn --host "gimp" "${@}";
+        dest-filename: gimp-host
+      # Allow to use GIMP from the flatpak as an external tool to edit photos
+      - type: script
+        commands:
+          - flatpak-spawn --host flatpak run "org.gimp.GIMP" "${@}";
+        dest-filename: gimp-flatpak
+      # Allow to use GIMP as an external tool to edit photos
+      - type: script
+        commands:
+          - |
+            if flatpak-spawn --host flatpak info "org.gimp.GIMP" >/dev/null 2>/dev/null; then
+              gimp-flatpak "${@}";
+            else
+              gimp-host "${@}";
+            fi;
+        dest-filename: gimp
+    post-install:
+      - install -p -D -m 0755 "../gimp"{,-flatpak,-host} -t "${FLATPAK_DEST}/bin/";
+      - xmlstarlet ed --inplace -d "/component/provides/binary[text()='rawtherapee-cli']"      "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.appdata.xml";
+      - install -p -D -m 0644 "../LICENSE.txt" -t "${FLATPAK_DEST}/share/licenses/rawtherapee/";
