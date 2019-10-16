@@ -17,11 +17,18 @@ finish-args:
   - --socket=pulseaudio
   # Filesystem access
   - --filesystem=home
+  # Access to temporary files
+  # Share data between RawTherapee and external editors, especially GIMP
+  - --filesystem=/tmp
   # Dconf access
   - --filesystem=xdg-run/dconf
   - --filesystem=~/.config/dconf:ro
   - --talk-name=ca.desrt.dconf
   - --env=DCONF_USER_CONFIG_DIR=.config/dconf
+  # Host commands access
+  # for flatpak-spawn
+  # Allow to use GIMP from the host as an external tool to edit photos
+  - --talk-name=org.freedesktop.Flatpak
   # OpenGL access
   - --device=dri
 cleanup:
@@ -205,7 +212,6 @@ modules:
       - --with-libxml-libs-prefix=/usr/lib
       - --with-libxml-include-prefix=/usr/include/libxml2
     sources:
-    # Source0
       - type: archive
         url: https://downloads.sourceforge.net/xmlstar/xmlstarlet-1.6.1.tar.gz
         sha256: 15d838c4f3375332fd95554619179b69e4ec91418a3a5296e7c631b7ed19e7ca
@@ -226,7 +232,12 @@ modules:
       - type: archive
         url: https://github.com/Beep6581/RawTherapee/releases/download/5.7/rawtherapee-5.7.tar.xz
         sha256: dbd7c7cf7488fb97c520821eee2c745291637644b391e3ec0ed3a29701f1a9c7
+      # Update XDG files
+      # Update screenshots in appdata file
+      # Add developer_name tag
       # https://github.com/Beep6581/RawTherapee/pull/5460
+      # https://github.com/Beep6581/RawTherapee/commit/c656fa0fc768c8fb8a82ca48e9a68b138bab370b
+      # https://github.com/Beep6581/RawTherapee/pull/5478
       - type: patch
         path: RawTherapee-5.7-xdg.patch
       # Quote parameters correctly for Linux when spawning (#5463)
@@ -266,5 +277,5 @@ modules:
         dest-filename: gimp
     post-install:
       - install -p -D -m 0755 "../gimp"{,-flatpak,-host} -t "${FLATPAK_DEST}/bin/";
-      - xmlstarlet ed --inplace -d "/component/provides/binary[text()='rawtherapee-cli']"      "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.appdata.xml";
+      - xmlstarlet ed --inplace -d "/component/provides/binary[text()='rawtherapee-cli']" "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.appdata.xml";
       - install -p -D -m 0644 "../LICENSE.txt" -t "${FLATPAK_DEST}/share/licenses/rawtherapee/";
