@@ -36,18 +36,16 @@ cleanup:
   - '*.la'
 modules:
   - name: mm-common
-    rm-configure: true
+    buildsystem: meson
     config-opts:
-      - --enable-maintainer-mode
-      - --disable-network
-    cleanup: ['*']
+      - --buildtype=debugoptimized
+      - --wrap-mode=nodownload
+      - -Duse-network=false
     sources:
       - type: archive
-        url: https://ftp.gnome.org/pub/GNOME/sources/mm-common/0.9/mm-common-0.9.12.tar.xz
-        sha256: ceffdcce1e5b52742884c233ec604bf6fded12eea9da077ce7a62c02c87e7c0b
-      - type: shell
-        commands:
-          - cp -p /usr/share/automake-*/config.{sub,guess} .;
+        url: https://ftp.gnome.org/pub/GNOME/sources/mm-common/1.0/mm-common-1.0.0.tar.xz
+        sha256: b97d9b041e5952486cab620b44ab09f6013a478f43b6699ae899b8a4da189cd4
+    cleanup: ['*']
 
   - name: libsigc++
     rm-configure: true
@@ -127,8 +125,8 @@ modules:
       - --enable-maintainer-mode
     sources:
       - type: archive
-        url: https://ftp.gnome.org/pub/GNOME/sources/gtkmm/3.24/gtkmm-3.24.1.tar.xz
-        sha256: ddfe42ed2458a20a34de252854bcf4b52d3f0c671c045f56b42aa27c7542d2fd
+        url: https://ftp.gnome.org/pub/GNOME/sources/gtkmm/3.24/gtkmm-3.24.2.tar.xz
+        sha256: 6d71091bcd1863133460d4188d04102810e9123de19706fb656b7bb915b4adc3
       - type: shell
         commands:
           - cp -p /usr/share/automake-*/config.{sub,guess} "build/";
@@ -225,33 +223,13 @@ modules:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
     sources:
       - type: archive
-        url: https://github.com/Beep6581/RawTherapee/releases/download/5.7/rawtherapee-5.7.tar.xz
-        sha256: dbd7c7cf7488fb97c520821eee2c745291637644b391e3ec0ed3a29701f1a9c7
-      # Update XDG files
-      # Update screenshots in appdata file
-      # Add developer_name tag
-      # Add StartupNotify entry
-      # https://github.com/Beep6581/RawTherapee/pull/5460
-      # https://github.com/Beep6581/RawTherapee/commit/c656fa0fc768c8fb8a82ca48e9a68b138bab370b
-      # https://github.com/Beep6581/RawTherapee/pull/5478
-      # https://github.com/Beep6581/RawTherapee/pull/5504
+        url: https://github.com/Beep6581/RawTherapee/releases/download/5.8/rawtherapee-5.8.tar.xz
+        sha256: 360528a0aae922eb5af8742f415475fb91b6d62a739da5f2804828f04ec40853
+      # Install additional icons
+      # https://github.com/Beep6581/RawTherapee/pull/5646
+      # https://github.com/Beep6581/RawTherapee/pull/5646/commits/291abfd7a705122420af7874c109c4fea712dada
       - type: patch
-        path: RawTherapee-5.7-xdg.patch
-      # Quote parameters correctly for Linux when spawning (#5463)
-      # https://github.com/Beep6581/RawTherapee/issues/5463
-      # https://github.com/Beep6581/RawTherapee/commit/5b72cc0dd3ce0288408ee0a1b0785f7c603a059e
-      - type: patch
-        path: RawTherapee-5.7-shell_quote.patch
-      # Fix launch of custom editor
-      # https://github.com/Beep6581/RawTherapee/issues/5472
-      # https://github.com/Beep6581/RawTherapee/pull/5473
-      # https://github.com/Beep6581/RawTherapee/pull/5473/commits/ca42b7b726f901c18153efd3206f1e4fe597b769
-      - type: patch
-        path: RawTherapee-5.7-custom-editor.patch
-      # Fix progress bar of invoking external editor
-      # https://github.com/Beep6581/RawTherapee/issues/5475
-      - type: patch
-        path: RawTherapee-5.7-progress-bar.patch
+        path: RawTherapee-5.8-icons.patch
       # Allow to use GIMP from the host as an external tool to edit photos
       - type: script
         commands:
@@ -274,5 +252,10 @@ modules:
         dest-filename: gimp
     post-install:
       - install -p -D -m 0755 "../gimp"{,-flatpak,-host} -t "${FLATPAK_DEST}/bin/";
-      - xmlstarlet ed --inplace -d "/component/provides/binary[text()='rawtherapee-cli']" "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.appdata.xml";
-      - install -p -D -m 0644 "../LICENSE.txt" -t "${FLATPAK_DEST}/share/licenses/rawtherapee/";
+      - gtk-update-icon-cache --force --ignore-theme-index "${FLATPAK_DEST}/share/icons/hicolor";
+      # https://github.com/Beep6581/RawTherapee/pull/5478
+      - |
+        for f in "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.appdata.xml"; do
+          xmlstarlet ed --inplace -d "/component/provides/binary[text()='rawtherapee-cli']" "${f}";
+          xmlstarlet ed --inplace -s '/component' -t elem -n 'developer_name' -v 'The RawTherapee Team' "${f}";
+        done;
