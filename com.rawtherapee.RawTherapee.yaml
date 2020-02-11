@@ -20,6 +20,8 @@ finish-args:
   # Access to temporary files
   # Share data between RawTherapee and external editors, especially GIMP
   - --filesystem=/tmp
+  # Allow access to the host's colord
+  - --system-talk-name=org.freedesktop.ColorManager
   # Host commands access
   # for flatpak-spawn
   # Allow to use GIMP from the host as an external tool to edit photos
