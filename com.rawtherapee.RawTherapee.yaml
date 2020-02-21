@@ -20,6 +20,10 @@ finish-args:
   # Access to temporary files
   # Share data between RawTherapee and external editors, especially GIMP
   - --filesystem=/tmp
+  # GVfs access
+  - --filesystem=xdg-run/gvfs:ro
+  - --talk-name=org.gtk.vfs
+  - --talk-name=org.gtk.vfs.*
   # Host commands access
   # for flatpak-spawn
   # Allow to use GIMP from the host as an external tool to edit photos
