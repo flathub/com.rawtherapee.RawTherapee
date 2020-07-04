@@ -167,8 +167,8 @@ modules:
       - -DEXIV2_BUILD_EXIV2_COMMAND:BOOL=OFF
     sources:
       - type: archive
-        url: https://github.com/Exiv2/exiv2/archive/v0.27.2.tar.gz
-        sha256: 3dbcaf01fbc5b98d42f091d1ff0d4b6cd9750dc724de3d9c0d113948570b2934
+        url: http://www.exiv2.org/builds/exiv2-0.27.3-Source.tar.gz
+        sha256: a79f5613812aa21755d578a297874fb59a85101e793edc64ec2c6bd994e3e778
 
   - name: libiptcdata
     config-opts:
