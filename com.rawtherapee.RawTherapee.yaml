@@ -1,6 +1,6 @@
 app-id: com.rawtherapee.RawTherapee
 runtime: org.gnome.Platform
-runtime-version: '3.36'
+runtime-version: '3.38'
 sdk: org.gnome.Sdk
 command: rawtherapee
 rename-desktop-file: rawtherapee.desktop
@@ -221,6 +221,16 @@ modules:
     post-install:
       - ln -s "xml" "${FLATPAK_DEST}/bin/xmlstarlet" ||:;
     cleanup: ["*"]
+
+  - name: libcanberra
+    config-opts:
+      - --disable-oss
+    cleanup:
+      - /share
+    sources:
+      - type: archive
+        url: http://0pointer.net/lennart/projects/libcanberra/libcanberra-0.30.tar.xz
+        sha256: c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72
 
   - name: RawTherapee
     buildsystem: cmake-ninja
