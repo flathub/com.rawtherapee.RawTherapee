@@ -185,25 +185,7 @@ modules:
         commands:
           - cp -p /usr/share/automake-*/config.{sub,guess} .;
 
-  - name: fftw3f
-    rm-configure: true
-    config-opts:
-      - --enable-shared
-      - --disable-static
-      - --disable-doc
-      - --enable-threads
-      - --enable-float
-      - --enable-openmp
-      - --enable-maintainer-mode
-    cleanup:
-      - /bin
-    sources:
-      - type: archive
-        url: http://www.fftw.org/fftw-3.3.8.tar.gz
-        sha256: 6113262f6e92c5bd474f2875fa1b01054c4ad5040f6b0da7c03c98821d9ae303
-      - type: shell
-        commands:
-          - cp -p /usr/share/automake-*/config.{sub,guess} .;
+  - shared-modules/linux-audio/fftw3f.json
 
   - name: xmlstarlet
     config-opts:
@@ -222,15 +204,7 @@ modules:
       - ln -s "xml" "${FLATPAK_DEST}/bin/xmlstarlet" ||:;
     cleanup: ["*"]
 
-  - name: libcanberra
-    config-opts:
-      - --disable-oss
-    cleanup:
-      - /share
-    sources:
-      - type: archive
-        url: http://0pointer.net/lennart/projects/libcanberra/libcanberra-0.30.tar.xz
-        sha256: c2b671e67e0c288a69fc33dc1b6f1b534d07882c2aceed37004bf48c601afa72
+  - shared-modules/libcanberra/libcanberra.json
 
   - name: RawTherapee
     buildsystem: cmake-ninja
