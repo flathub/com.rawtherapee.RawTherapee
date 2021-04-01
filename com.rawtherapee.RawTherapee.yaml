@@ -9,7 +9,7 @@ copy-icon: true
 finish-args:
   # X11 + XShm access
   - --share=ipc
-  - --socket=x11
+  - --socket=fallback-x11
   # Wayland access
   - --socket=wayland
   # Audio access
@@ -22,7 +22,7 @@ finish-args:
   - --filesystem=/tmp
   # GVfs access
   - --filesystem=xdg-run/gvfs:ro
-  - --talk-name=org.gtk.vfs
+  - --filesystem=xdg-run/gvfsd
   - --talk-name=org.gtk.vfs.*
   # Host commands access
   # for flatpak-spawn
