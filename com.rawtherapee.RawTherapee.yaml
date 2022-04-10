@@ -1,6 +1,6 @@
 app-id: com.rawtherapee.RawTherapee
 runtime: org.gnome.Platform
-runtime-version: '41'
+runtime-version: '42'
 sdk: org.gnome.Sdk
 command: rawtherapee
 rename-desktop-file: rawtherapee.desktop
@@ -94,18 +94,13 @@ modules:
           - cp -p /usr/share/automake-*/config.{sub,guess} "build/";
 
   - name: pangomm
-    rm-configure: true
+    buildsystem: meson
     config-opts:
-      - --disable-static
-      - --disable-documentation
-      - --enable-maintainer-mode
+      - -Dbuild-documentation=false
     sources:
       - type: archive
-        url: https://ftp.gnome.org/pub/GNOME/sources/pangomm/2.42/pangomm-2.42.0.tar.xz
-        sha256: ca6da067ff93a6445780c0b4b226eb84f484ab104b8391fb744a45cbc7edbf56
-      - type: shell
-        commands:
-          - cp -p /usr/share/automake-*/config.{sub,guess} "build/";
+        url: https://download.gnome.org/sources/pangomm/2.46/pangomm-2.46.2.tar.xz
+        sha256: 57442ab4dc043877bfe3839915731ab2d693fc6634a71614422fb530c9eaa6f4
 
   - name: atkmm
     rm-configure: true
