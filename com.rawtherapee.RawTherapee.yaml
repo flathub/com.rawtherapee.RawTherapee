@@ -96,6 +96,7 @@ modules:
   - name: pangomm
     buildsystem: meson
     config-opts:
+      - -Dbuildtype=release
       - -Dbuild-documentation=false
     sources:
       - type: archive
