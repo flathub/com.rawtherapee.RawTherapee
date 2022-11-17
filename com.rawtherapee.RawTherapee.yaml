@@ -1,6 +1,6 @@
 app-id: com.rawtherapee.RawTherapee
 runtime: org.gnome.Platform
-runtime-version: '42'
+runtime-version: '43'
 sdk: org.gnome.Sdk
 command: rawtherapee
 rename-desktop-file: rawtherapee.desktop
@@ -34,8 +34,14 @@ cleanup:
   - /include
   - /lib/cmake
   - /lib/pkgconfig
+  - /lib/*/include
+  - /lib/*/proc
+  - /share/gdm
+  - /share/gnome
   - /share/gtk-doc
+  - /share/info
   - /share/man
+  - /share/vala
   - '*.a'
   - '*.la'
 modules:
@@ -172,24 +178,6 @@ modules:
           - cp -p /usr/share/automake-*/config.{sub,guess} .;
 
   - shared-modules/linux-audio/fftw3f.json
-
-  - name: xmlstarlet
-    config-opts:
-      - --disable-static-libs
-      - --with-libxml-libs-prefix=/usr/lib
-      - --with-libxml-include-prefix=/usr/include/libxml2
-    sources:
-      - type: archive
-        url: https://downloads.sourceforge.net/xmlstar/xmlstarlet-1.6.1.tar.gz
-        sha256: 15d838c4f3375332fd95554619179b69e4ec91418a3a5296e7c631b7ed19e7ca
-      - type: shell
-        commands:
-          - cp -p /usr/share/automake-*/config.{sub,guess} .;
-          - autoreconf -vfi;
-    post-install:
-      - ln -s "xml" "${FLATPAK_DEST}/bin/xmlstarlet" ||:;
-    cleanup: ["*"]
-
   - shared-modules/libcanberra/libcanberra.json
 
   - name: RawTherapee
@@ -197,15 +185,14 @@ modules:
     builddir: true
     config-opts:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
+      - -DCACHE_NAME_SUFFIX=""
     sources:
       - type: archive
-        url: https://github.com/Beep6581/RawTherapee/releases/download/5.8/rawtherapee-5.8.tar.xz
-        sha256: 360528a0aae922eb5af8742f415475fb91b6d62a739da5f2804828f04ec40853
-      # Install additional icons
-      # https://github.com/Beep6581/RawTherapee/pull/5646
-      # https://github.com/Beep6581/RawTherapee/pull/5646/commits/291abfd7a705122420af7874c109c4fea712dada
+        url: https://github.com/Beep6581/RawTherapee/releases/download/5.9-rc1/rawtherapee-5.9-rc1.tar.xz
+        sha256: 399658f0a9c61dcc1a3ab9f81ba042aa99b69eff2b042c05f00b5d40b4b6270d
+      # Just patch the appdata.
       - type: patch
-        path: RawTherapee-5.8-icons.patch
+        path: RawTherapee-appdata.patch
       # Allow to use GIMP from the host as an external tool to edit photos
       - type: script
         commands:
@@ -227,20 +214,5 @@ modules:
             fi;
         dest-filename: gimp
     post-install:
-      - install -p -D -m 0755 "../gimp"{,-flatpak,-host} -t "${FLATPAK_DEST}/bin/";
+      - install -Dm 0755 "../gimp"{,-flatpak,-host} -t "${FLATPAK_DEST}/bin/";
       - gtk-update-icon-cache --force --ignore-theme-index "${FLATPAK_DEST}/share/icons/hicolor";
-      - |
-        for f in "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.appdata.xml"; do
-          # Add the developer_name tag
-          # https://github.com/Beep6581/RawTherapee/pull/5478
-          xmlstarlet ed --inplace -s '/component' -t elem -n 'developer_name' -v 'The RawTherapee Team' "${f}";
-          # rawtherapee-cli is not accessible from the host
-          xmlstarlet ed --inplace -d "/component/provides/binary[text()='rawtherapee-cli']" "${f}";
-          # The provides tag describes the public interfaces this program provides
-          # The binary tag is a child tag of the provides tag
-          # It provides the name of a binary installed into a location in PATH
-          # However, flatpak doesn't export any binaries on the host
-          # https://www.freedesktop.org/software/appstream/docs/chap-Metadata.html#tag-provides
-          xmlstarlet ed --inplace -d '/component/provides/binary' "${f}";
-          xmlstarlet ed --inplace -d '/component/provides[not(./*) and (not(./text()) or normalize-space(./text())="")]' "${f}";
-        done;

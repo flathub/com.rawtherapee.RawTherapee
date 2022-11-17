@@ -1,0 +1,25 @@
+--- rawtherapee-5.9-rc1/com.rawtherapee.RawTherapee.appdata.xml-orig	2022-11-16 20:34:16.126900349 -0500
++++ rawtherapee-5.9-rc1/com.rawtherapee.RawTherapee.appdata.xml	2022-11-16 20:36:33.612326599 -0500
+@@ -22,15 +22,12 @@
+     <url type="translate">https://rawpedia.rawtherapee.com/Main_Page#Localization</url>
+     <launchable type="desktop-id">rawtherapee.desktop</launchable>
+     <releases>
++        <release version="5.9-rc1" date="2022-11-16"></release>
+         <release version="5.8" date="2020-02-04" type="stable"></release>
+         <release version="5.7" date="2019-09-10" type="stable"></release>
+         <release version="5.6" date="2019-04-20" type="stable"></release>
+         <release version="5.5" date="2018-12-17" type="stable"></release>
+     </releases>
+-    <provides>
+-        <binary>rawtherapee</binary>
+-        <binary>rawtherapee-cli</binary>
+-    </provides>
+     <screenshots>
+         <screenshot type="default">
+             <caption>Color correction</caption>
+@@ -50,4 +47,5 @@
+         </screenshot>
+     </screenshots>
+     <update_contact>contactus@rawtherapee.com</update_contact>
++    <developer_name>The RawTherapee Team</developer_name>
+ </component>
