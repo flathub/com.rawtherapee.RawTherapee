@@ -188,8 +188,8 @@ modules:
       - -DCACHE_NAME_SUFFIX=""
     sources:
       - type: archive
-        url: https://github.com/Beep6581/RawTherapee/releases/download/5.9-rc1/rawtherapee-5.9-rc1.tar.xz
-        sha256: 399658f0a9c61dcc1a3ab9f81ba042aa99b69eff2b042c05f00b5d40b4b6270d
+        url: https://github.com/Beep6581/RawTherapee/releases/download/5.9/rawtherapee-5.9.tar.xz
+        sha256: 8eaf28c428185c165ef5a28f69595dc77a1c98826065a1f51a28c86c7b0d4823
       # Just patch the appdata.
       - type: patch
         path: RawTherapee-appdata.patch
