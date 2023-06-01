@@ -1,6 +1,6 @@
 app-id: com.rawtherapee.RawTherapee
 runtime: org.gnome.Platform
-runtime-version: '43'
+runtime-version: '44'
 sdk: org.gnome.Sdk
 command: rawtherapee
 rename-desktop-file: rawtherapee.desktop
@@ -148,21 +148,6 @@ modules:
       - type: archive
         url: https://github.com/lensfun/lensfun/archive/refs/tags/v0.3.3.tar.gz
         sha256: 57ba5a0377f24948972339e18be946af12eda22b7c707eb0ddd26586370f6765
-      - type: patch
-        path: lensfun-0.3.2-Pull-isnan-into-std-namespace-include-cmath-not-math.patch
-
-  - name: exiv2
-    buildsystem: cmake-ninja
-    builddir: true
-    config-opts:
-      - -DCMAKE_BUILD_TYPE=RelWithDebInfo
-      - -DEXIV2_BUILD_DOC:BOOL=OFF
-      - -DEXIV2_BUILD_SAMPLES:BOOL=OFF
-      - -DEXIV2_BUILD_EXIV2_COMMAND:BOOL=OFF
-    sources:
-      - type: archive
-        url: https://github.com/Exiv2/exiv2/releases/download/v0.27.5/exiv2-0.27.5-Source.tar.gz
-        sha256: 35a58618ab236a901ca4928b0ad8b31007ebdc0386d904409d825024e45ea6e2
 
   - name: libiptcdata
     config-opts:
@@ -186,6 +171,9 @@ modules:
     config-opts:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - -DCACHE_NAME_SUFFIX=""
+    post-install:
+      - install -Dm 0755 "../gimp"{,-flatpak,-host} -t "${FLATPAK_DEST}/bin/";
+      - gtk-update-icon-cache --force --ignore-theme-index "${FLATPAK_DEST}/share/icons/hicolor";
     sources:
       - type: archive
         url: https://github.com/Beep6581/RawTherapee/releases/download/5.9/rawtherapee-5.9.tar.xz
@@ -213,6 +201,3 @@ modules:
               gimp-host "${@}";
             fi;
         dest-filename: gimp
-    post-install:
-      - install -Dm 0755 "../gimp"{,-flatpak,-host} -t "${FLATPAK_DEST}/bin/";
-      - gtk-update-icon-cache --force --ignore-theme-index "${FLATPAK_DEST}/share/icons/hicolor";
