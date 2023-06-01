@@ -124,18 +124,15 @@ modules:
           - cp -p /usr/share/automake-*/config.{sub,guess} "build/";
 
   - name: gtkmm
-    rm-configure: true
+    buildsystem: meson
     config-opts:
-      - --disable-static
-      - --disable-documentation
-      - --enable-maintainer-mode
+      - -Dmaintainer-mode=false
+      - -Dbuild-demos=false
+      - -Dbuild-tests=false
     sources:
       - type: archive
-        url: https://ftp.gnome.org/pub/GNOME/sources/gtkmm/3.24/gtkmm-3.24.2.tar.xz
-        sha256: 6d71091bcd1863133460d4188d04102810e9123de19706fb656b7bb915b4adc3
-      - type: shell
-        commands:
-          - cp -p /usr/share/automake-*/config.{sub,guess} "build/";
+        url: https://download.gnome.org/sources/gtkmm/3.24/gtkmm-3.24.7.tar.xz
+        sha256: 1d7a35af9c5ceccacb244ee3c2deb9b245720d8510ac5c7e6f4b6f9947e6789c
 
   - name: lensfun
     buildsystem: cmake-ninja
