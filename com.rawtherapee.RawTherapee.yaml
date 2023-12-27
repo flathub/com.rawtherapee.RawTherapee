@@ -1,6 +1,6 @@
 app-id: com.rawtherapee.RawTherapee
 runtime: org.gnome.Platform
-runtime-version: '44'
+runtime-version: '45'
 sdk: org.gnome.Sdk
 command: rawtherapee
 rename-desktop-file: rawtherapee.desktop
@@ -179,6 +179,9 @@ modules:
   - name: RawTherapee
     buildsystem: cmake-ninja
     builddir: true
+    build-options:
+      cflags: '-O3'
+      cxxflags: '-O3'
     config-opts:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - -DCACHE_NAME_SUFFIX=""
@@ -189,9 +192,10 @@ modules:
       - type: archive
         url: https://github.com/Beep6581/RawTherapee/releases/download/5.9/rawtherapee-5.9.tar.xz
         sha256: 8eaf28c428185c165ef5a28f69595dc77a1c98826065a1f51a28c86c7b0d4823
-      # Just patch the appdata.
       - type: patch
-        path: RawTherapee-appdata.patch
+        paths:
+          - RawTherapee-appdata.patch
+          - rtengine-build.patch
       # Allow to use GIMP from the host as an external tool to edit photos
       - type: script
         commands:
