@@ -176,6 +176,19 @@ modules:
   - shared-modules/linux-audio/fftw3f.json
   - shared-modules/libcanberra/libcanberra.json
 
+  - name: exiv2
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DEXIV2_BUILD_DOC:BOOL=OFF
+      - -DEXIV2_BUILD_EXIV2_COMMAND=OFF
+      - -DEXIV2_ENABLE_BMFF=ON
+      - -DEXIV2_BUILD_SAMPLES=OFF
+    sources:
+      - type: archive
+        url: https://github.com/Exiv2/exiv2/releases/download/v0.27.7/exiv2-0.27.7-Source.tar.gz
+        sha256: 70629dc27e3d4dd5c3fa91afbea93166d338b1de284e6a4c44bbf9dcfe7bbc6d
+
   - name: RawTherapee
     buildsystem: cmake-ninja
     builddir: true
@@ -190,12 +203,11 @@ modules:
       - gtk-update-icon-cache --force --ignore-theme-index "${FLATPAK_DEST}/share/icons/hicolor";
     sources:
       - type: archive
-        url: https://github.com/Beep6581/RawTherapee/releases/download/5.9/rawtherapee-5.9.tar.xz
-        sha256: 8eaf28c428185c165ef5a28f69595dc77a1c98826065a1f51a28c86c7b0d4823
+        url: https://github.com/Beep6581/RawTherapee/releases/download/5.10/rawtherapee-5.10.tar.xz
+        sha256: a799b53cd54dba4a211479e342ffc9c5db1c44d3d6c3a27d5cc13adf0debd2da
       - type: patch
         paths:
           - RawTherapee-appdata.patch
-          - rtengine-build.patch
       # Allow to use GIMP from the host as an external tool to edit photos
       - type: script
         commands:
