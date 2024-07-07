@@ -208,6 +208,7 @@ modules:
       - type: patch
         paths:
           - RawTherapee-appdata.patch
+          - 0001-jpeg-turbo.patch
       # Allow to use GIMP from the host as an external tool to edit photos
       - type: script
         commands:
