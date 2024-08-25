@@ -1,6 +1,6 @@
 app-id: com.rawtherapee.RawTherapee
 runtime: org.gnome.Platform
-runtime-version: '45'
+runtime-version: '46'
 sdk: org.gnome.Sdk
 command: rawtherapee
 rename-desktop-file: rawtherapee.desktop
@@ -158,7 +158,7 @@ modules:
       - type: git
         dest: lensfun-git
         url: https://github.com/lensfun/lensfun.git
-        commit: f034ab32b1afc144f2bcc1471340fb68fb4e94ea
+        commit: 1eeba3a19ded59b3b5ef8dde2850273e733fac36
 
   - name: libiptcdata
     config-opts:
@@ -203,12 +203,11 @@ modules:
       - gtk-update-icon-cache --force --ignore-theme-index "${FLATPAK_DEST}/share/icons/hicolor";
     sources:
       - type: archive
-        url: https://github.com/Beep6581/RawTherapee/releases/download/5.10/rawtherapee-5.10.tar.xz
-        sha256: a799b53cd54dba4a211479e342ffc9c5db1c44d3d6c3a27d5cc13adf0debd2da
+        url: https://github.com/Beep6581/RawTherapee/releases/download/5.11/rawtherapee-5.11.tar.xz
+        sha256: e584c18dec112de29954b2b6471449a302a85e5cca4e42ede75fa333a36de724
       - type: patch
         paths:
           - RawTherapee-appdata.patch
-          - 0001-jpeg-turbo.patch
       # Allow to use GIMP from the host as an external tool to edit photos
       - type: script
         commands:
