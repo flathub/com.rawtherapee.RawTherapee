@@ -158,7 +158,7 @@ modules:
       - type: git
         dest: lensfun-git
         url: https://github.com/lensfun/lensfun.git
-        commit: ce9aefed054a2860061361977dca812b4acb2475
+        commit: fcbfbf38e5c297fc5595705c2e61ff5b3eaeb9d9
 
   - name: libiptcdata
     config-opts:
@@ -203,8 +203,8 @@ modules:
       - gtk-update-icon-cache --force --ignore-theme-index "${FLATPAK_DEST}/share/icons/hicolor";
     sources:
       - type: archive
-        url: https://github.com/RawTherapee/RawTherapee/releases/download/5.11/rawtherapee-5.11.tar.xz
-        sha256: e584c18dec112de29954b2b6471449a302a85e5cca4e42ede75fa333a36de724
+        url: https://github.com/RawTherapee/RawTherapee/releases/download/5.12/rawtherapee-5.12.tar.xz
+        sha256: d9a6c10537d64a285bc465675fe59aaa94ce3223823dfbecf0ae2c9599082d57
       - type: patch
         paths:
           - RawTherapee-appdata.patch
