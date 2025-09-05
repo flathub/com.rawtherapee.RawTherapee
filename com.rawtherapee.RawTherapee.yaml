@@ -207,7 +207,8 @@ modules:
         sha256: d9a6c10537d64a285bc465675fe59aaa94ce3223823dfbecf0ae2c9599082d57
       - type: patch
         paths:
-          - RawTherapee-appdata.patch
+          - patches/RawTherapee-appdata.patch
+          - patches/RawTherapee-mime.patch
       # Allow to use GIMP from the host as an external tool to edit photos
       - type: script
         commands:
