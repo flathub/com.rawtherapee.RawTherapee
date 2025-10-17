@@ -1,0 +1,158 @@
+From f0681b6c7a402636dba6cd335b4098fe0767f458 Mon Sep 17 00:00:00 2001
+From: Daniel Gao <daniel.gao.work@gmail.com>
+Date: Fri, 4 Jul 2025 13:06:04 -0400
+Subject: [PATCH 4/4] Fix recursive init and build issues
+
+---
+ rtengine/rtapp.cc |  9 ++++++++-
+ rtengine/rtapp.h  |  6 +-----
+ rtgui/main-cli.cc | 26 +++++++++++++-------------
+ rtgui/main.cc     |  8 ++++----
+ 4 files changed, 26 insertions(+), 23 deletions(-)
+
+diff --git a/rtengine/rtapp.cc b/rtengine/rtapp.cc
+index 07dc852a5..70358acc9 100644
+--- a/rtengine/rtapp.cc
++++ b/rtengine/rtapp.cc
+@@ -37,7 +37,6 @@ App& App::get()
+ 
+ App::App()
+     : m_options(new Options())
+-    , m_fallback_color_cmp(new rtengine::procparams::ColorManagementParams())
+     , m_simple_editor(false)
+     , m_gimp_plugin(false)
+     , m_remote(false)
+@@ -48,3 +47,11 @@ const rtengine::Settings& App::settings() const
+ {
+     return m_options->rtSettings;
+ }
++
++const rtengine::procparams::ColorManagementParams& App::fallbackColorCmp() const
++{
++    // Constructor accesses App::get().options(), so we can't initialize this
++    // in the constructor of App. It would be a recursive init.
++    static rtengine::procparams::ColorManagementParams cmp;
++    return cmp;
++}
+diff --git a/rtengine/rtapp.h b/rtengine/rtapp.h
+index cc44c202c..2dc0ba6fb 100644
+--- a/rtengine/rtapp.h
++++ b/rtengine/rtapp.h
+@@ -45,10 +45,7 @@ public:
+     Options& mut_options() { return *m_options; }
+     const rtengine::Settings& settings() const;
+ 
+-    const rtengine::procparams::ColorManagementParams& fallbackColorCmp() const
+-    {
+-        return *m_fallback_color_cmp;
+-    }
++    const rtengine::procparams::ColorManagementParams& fallbackColorCmp() const;
+ 
+     const Glib::ustring& argv0() const { return m_argv0; }
+     const Glib::ustring& argv1() const { return m_argv1; }
+@@ -77,7 +74,6 @@ private:
+     Glib::ustring m_license_path;
+ 
+     std::unique_ptr<Options> m_options;
+-    std::unique_ptr<rtengine::procparams::ColorManagementParams> m_fallback_color_cmp;
+ 
+     bool m_simple_editor;
+     bool m_gimp_plugin;
+diff --git a/rtgui/main-cli.cc b/rtgui/main-cli.cc
+index 74fdb6e84..a03daaac7 100644
+--- a/rtgui/main-cli.cc
++++ b/rtgui/main-cli.cc
+@@ -82,7 +82,7 @@ int main (int argc, char **argv)
+ 
+     Gio::init ();
+ 
+-    //mainThread = Glib::Threads::Thread::self();
++    auto& app = App::get();
+ 
+ #ifdef BUILD_BUNDLE
+     char exname[512] = {0};
+@@ -98,34 +98,34 @@ int main (int argc, char **argv)
+         strncpy (exname, argv[0], 511);
+     }
+ 
+-#endif
++#endif // _WIN32
+     exePath = Glib::path_get_dirname (exname);
+ 
+     // set paths
+     if (Glib::path_is_absolute (DATA_SEARCH_PATH)) {
+-        App::get().setArgv0(DATA_SEARCH_PATH);
++        app.setArgv0(DATA_SEARCH_PATH);
+     } else {
+-        App::get().setArgv0(Glib::build_filename(exePath, DATA_SEARCH_PATH));
++        app.setArgv0(Glib::build_filename(exePath, DATA_SEARCH_PATH));
+     }
+ 
+     if (Glib::path_is_absolute (CREDITS_SEARCH_PATH)) {
+-        App::get().setCreditsPath(CREDITS_SEARCH_PATH);
++        app.setCreditsPath(CREDITS_SEARCH_PATH);
+     } else {
+-        App::get().setCreditsPath(Glib::build_filename(exePath, CREDITS_SEARCH_PATH));
++        app.setCreditsPath(Glib::build_filename(exePath, CREDITS_SEARCH_PATH));
+     }
+ 
+     if (Glib::path_is_absolute (LICENCE_SEARCH_PATH)) {
+-        App::get().setLicensePath(LICENCE_SEARCH_PATH);
++        app.setLicensePath(LICENCE_SEARCH_PATH);
+     } else {
+-        App::get().setLicensePath(Glib::build_filename(exePath, LICENCE_SEARCH_PATH));
++        app.setLicensePath(Glib::build_filename(exePath, LICENCE_SEARCH_PATH));
+     }
+ #else
+-    App::get().setArgv0(DATA_SEARCH_PATH);
+-    App::get().setCreditsPath(CREDITS_SEARCH_PATH);
+-    App::get().setLicensePath(LICENCE_SEARCH_PATH);
+-#endif
++    app.setArgv0(DATA_SEARCH_PATH);
++    app.setCreditsPath(CREDITS_SEARCH_PATH);
++    app.setLicensePath(LICENCE_SEARCH_PATH);
++#endif // BUILD_BUNDLE
+ 
+-    Options& options = App::get().mut_options();
++    Options& options = app.mut_options();
+     options.rtSettings.lensfunDbDirectory = LENSFUN_DB_PATH;
+     options.rtSettings.lensfunDbBundleDirectory = LENSFUN_DB_PATH;
+ 
+diff --git a/rtgui/main.cc b/rtgui/main.cc
+index 76557e1a1..ded7076be 100644
+--- a/rtgui/main.cc
++++ b/rtgui/main.cc
+@@ -357,6 +357,8 @@ int main (int argc, char **argv)
+     }
+ #endif
+ 
++    auto& app = App::get();
++
+ #ifdef BUILD_BUNDLE
+     char exname[512] = {0};
+     Glib::ustring exePath;
+@@ -371,11 +373,9 @@ int main (int argc, char **argv)
+         strncpy (exname, argv[0], 511);
+     }
+ 
+-#endif
++#endif // _WIN32
+     exePath = Glib::path_get_dirname (exname);
+ 
+-    auto& app = App::get();
+-
+     // set paths
+     if (Glib::path_is_absolute (DATA_SEARCH_PATH)) {
+         app.setArgv0(DATA_SEARCH_PATH);
+@@ -398,7 +398,7 @@ int main (int argc, char **argv)
+     app.setArgv0(DATA_SEARCH_PATH);
+     app.setCreditsPath(CREDITS_SEARCH_PATH);
+     app.setLicensePath(LICENCE_SEARCH_PATH);
+-#endif
++#endif // BUILD_BUNDLE
+ 
+     app.mut_options().rtSettings.lensfunDbDirectory = LENSFUN_DB_PATH;
+     app.mut_options().rtSettings.lensfunDbBundleDirectory = LENSFUN_DB_PATH;
+-- 
+2.51.0
+

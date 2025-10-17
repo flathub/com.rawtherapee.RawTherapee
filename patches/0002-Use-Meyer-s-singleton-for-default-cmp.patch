@@ -1,0 +1,157 @@
+From 850be21845b145c125e7009fd98be3c30a88ead6 Mon Sep 17 00:00:00 2001
+From: Daniel Gao <daniel.gao.work@gmail.com>
+Date: Tue, 1 Jul 2025 10:00:35 -0400
+Subject: [PATCH 2/4] Use Meyer's singleton for default cmp
+
+---
+ rtengine/procparams.cc       |  6 ++++++
+ rtengine/procparams.h        |  2 ++
+ rtgui/histogrampanel.cc      | 14 ++++----------
+ rtgui/lockablecolorpicker.cc | 11 +++--------
+ rtgui/navigator.cc           | 10 ++--------
+ 5 files changed, 17 insertions(+), 26 deletions(-)
+
+diff --git a/rtengine/procparams.cc b/rtengine/procparams.cc
+index 2abb30593..58b0862c3 100644
+--- a/rtengine/procparams.cc
++++ b/rtengine/procparams.cc
+@@ -2653,6 +2653,12 @@ bool FramingParams::operator !=(const FramingParams& other) const
+ const Glib::ustring ColorManagementParams::NoICMString = Glib::ustring("No ICM: sRGB output");
+ const Glib::ustring ColorManagementParams::NoProfileString = Glib::ustring("(none)");
+ 
++const ColorManagementParams& ColorManagementParams::getDefault()
++{
++    static ColorManagementParams singleton;
++    return singleton;
++}
++
+ ColorManagementParams::ColorManagementParams() :
+     inputProfile("(cameraICC)"),
+     toneCurve(false),
+diff --git a/rtengine/procparams.h b/rtengine/procparams.h
+index f34083fcf..efad7fcdb 100644
+--- a/rtengine/procparams.h
++++ b/rtengine/procparams.h
+@@ -2234,6 +2234,8 @@ struct ColorManagementParams {
+     static const Glib::ustring NoICMString;
+     static const Glib::ustring NoProfileString;
+ 
++    static const ColorManagementParams& getDefault();
++
+     ColorManagementParams();
+ 
+     bool operator ==(const ColorManagementParams& other) const;
+diff --git a/rtgui/histogrampanel.cc b/rtgui/histogrampanel.cc
+index 97c782677..ff8bd3e1d 100644
+--- a/rtgui/histogrampanel.cc
++++ b/rtgui/histogrampanel.cc
+@@ -36,14 +36,6 @@ constexpr float HistogramArea::MIN_BRIGHT;
+ 
+ using ScopeType = Options::ScopeType;
+ 
+-
+-namespace
+-{
+-
+-const rtengine::procparams::ColorManagementParams DEFAULT_CMP;
+-
+-}
+-
+ //
+ //
+ // HistogramPanel
+@@ -893,12 +885,13 @@ bool HistogramRGBArea::updatePointer (const int new_r, const int new_g, const in
+         r = new_r;
+         g = new_g;
+         b = new_b;
++        using ColorManagementParams = rtengine::procparams::ColorManagementParams;
+         ImProcFunctions::rgb2lab(
+             static_cast<std::uint8_t>(r),
+             static_cast<std::uint8_t>(g),
+             static_cast<std::uint8_t>(b),
+             lab_L, lab_a, lab_b,
+-            cmp != nullptr ? *cmp : DEFAULT_CMP,
++            cmp != nullptr ? *cmp : ColorManagementParams::getDefault(),
+             true);
+         pointerValid = true;
+     }
+@@ -1421,12 +1414,13 @@ bool HistogramArea::updatePointer(const int r, const int g, const int b, const r
+         pointer_red = r;
+         pointer_green = g;
+         pointer_blue = b;
++        using ColorManagementParams = rtengine::procparams::ColorManagementParams;
+         ImProcFunctions::rgb2lab(
+             static_cast<std::uint8_t>(r),
+             static_cast<std::uint8_t>(g),
+             static_cast<std::uint8_t>(b),
+             L, pointer_a, pointer_b,
+-            cmp != nullptr ? *cmp : DEFAULT_CMP,
++            cmp != nullptr ? *cmp : ColorManagementParams::getDefault(),
+             true);
+         L /= 327.68f;
+         pointer_a /= 327.68f;
+diff --git a/rtgui/lockablecolorpicker.cc b/rtgui/lockablecolorpicker.cc
+index 8c8d73418..7357b9f3f 100644
+--- a/rtgui/lockablecolorpicker.cc
++++ b/rtgui/lockablecolorpicker.cc
+@@ -27,13 +27,6 @@
+ #include "multilangmgr.h"
+ #include "navigator.h"
+ 
+-namespace
+-{
+-
+-const rtengine::procparams::ColorManagementParams DEFAULT_CMP;
+-
+-}
+-
+ LockableColorPicker::LockableColorPicker (CropWindow* cropWindow, rtengine::procparams::ColorManagementParams *color_management_params)
+ : cropWindow(cropWindow), displayedValues(ColorPickerType::RGB), position(0, 0), size(Size::S15),
+   color_management_params(color_management_params), validity(Validity::OUTSIDE),
+@@ -288,12 +281,14 @@ void LockableColorPicker::setRGB (const float R, const float G, const float B, c
+     bpreview = previewB;
+ 
+     rtengine::Color::rgb2hsv01(r, g, b, hue, sat, val);
++    using ColorManagementParams = rtengine::procparams::ColorManagementParams;
+     rtengine::ImProcFunctions::rgb2lab(
+         static_cast<std::uint8_t>(255 * r),
+         static_cast<std::uint8_t>(255 * g),
+         static_cast<std::uint8_t>(255 * b),
+         L, a, bb,
+-        color_management_params != nullptr ? *color_management_params : DEFAULT_CMP,
++        color_management_params != nullptr
++            ? *color_management_params : ColorManagementParams::getDefault(),
+         true);
+     L /= 327.68f;
+     a /= 327.68f;
+diff --git a/rtgui/navigator.cc b/rtgui/navigator.cc
+index cdff5f70b..41dc9acdc 100644
+--- a/rtgui/navigator.cc
++++ b/rtgui/navigator.cc
+@@ -27,13 +27,6 @@
+ 
+ using namespace rtengine;
+ 
+-namespace
+-{
+-
+-const rtengine::procparams::ColorManagementParams DEFAULT_CMP;
+-
+-}
+-
+ Navigator::Navigator() :
+     pointer_moved_delayed_call(50, 100),
+     currentRGBUnit(options.navRGBUnit),
+@@ -74,7 +67,8 @@ Navigator::Navigator() :
+                         static_cast<std::uint8_t>(g),
+                         static_cast<std::uint8_t>(b),
+                         LAB_l, LAB_a, LAB_b,
+-                        cmp != nullptr ? *cmp : DEFAULT_CMP,
++                        cmp != nullptr
++                            ? *cmp : procparams::ColorManagementParams::getDefault(),
+                         true);
+                     LAB_l /= 327.68f;
+                     LAB_a /= 327.68f;
+-- 
+2.51.0
+

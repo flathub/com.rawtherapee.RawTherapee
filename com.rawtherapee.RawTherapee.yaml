@@ -1,6 +1,6 @@
 app-id: com.rawtherapee.RawTherapee
 runtime: org.gnome.Platform
-runtime-version: '48'
+runtime-version: '49'
 sdk: org.gnome.Sdk
 command: rawtherapee
 rename-desktop-file: rawtherapee.desktop
@@ -137,6 +137,7 @@ modules:
   - name: lensfun
     buildsystem: cmake-ninja
     config-opts:
+      - -DCMAKE_POLICY_VERSION_MINIMUM=3.5
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
     post-install:
       - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} lxml --ignore-installed
@@ -209,6 +210,10 @@ modules:
         paths:
           - patches/RawTherapee-appdata.patch
           - patches/RawTherapee-mime.patch
+          - patches/0001-Fix-read-before-initialize-of-options.rtSettings.srg.patch
+          - patches/0002-Use-Meyer-s-singleton-for-default-cmp.patch
+          - patches/0003-Group-extern-variables-into-App-singleton.patch
+          - patches/0004-Fix-recursive-init-and-build-issues.patch
       # Allow to use GIMP from the host as an external tool to edit photos
       - type: script
         commands:
