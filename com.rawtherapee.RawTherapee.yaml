@@ -1,6 +1,6 @@
 app-id: com.rawtherapee.RawTherapee
 runtime: org.gnome.Platform
-runtime-version: '49'
+runtime-version: '50'
 sdk: org.gnome.Sdk
 command: rawtherapee
 rename-desktop-file: rawtherapee.desktop
@@ -140,7 +140,7 @@ modules:
       - -DCMAKE_POLICY_VERSION_MINIMUM=3.5
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
     post-install:
-      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} lxml --ignore-installed
+      - pip3 install --no-index --find-links="file://${PWD}" --prefix=${FLATPAK_DEST} lxml --ignore-installed --no-build-isolation
       - python3 lensfun_convert_db.py $PWD lensfun-git/data/db
       - rm -rf /app/share/lensfun/version_1/*
       - tar xvf db/version_1.tar -C /app/share/lensfun/version_1
@@ -159,7 +159,7 @@ modules:
       - type: git
         dest: lensfun-git
         url: https://github.com/lensfun/lensfun.git
-        commit: fcbfbf38e5c297fc5595705c2e61ff5b3eaeb9d9
+        commit: 698a39eea69be00f4f25b6da6c1ad34b1f162b50
 
   - name: libiptcdata
     config-opts:
@@ -199,21 +199,17 @@ modules:
     config-opts:
       - -DCMAKE_BUILD_TYPE=RelWithDebInfo
       - -DCACHE_NAME_SUFFIX=""
+      - -DWITH_SYSTEM_FMT=ON
     post-install:
       - install -Dm 0755 "../gimp"{,-flatpak,-host} -t "${FLATPAK_DEST}/bin/";
-      - gtk-update-icon-cache --force --ignore-theme-index "${FLATPAK_DEST}/share/icons/hicolor";
     sources:
       - type: archive
-        url: https://github.com/RawTherapee/RawTherapee/releases/download/5.12/rawtherapee-5.12.tar.xz
-        sha256: d9a6c10537d64a285bc465675fe59aaa94ce3223823dfbecf0ae2c9599082d57
+        url: https://github.com/RawTherapee/RawTherapee/releases/download/5.13/rawtherapee-5.13.tar.xz
+        sha256: 23bdff4b1817e1274c11a94b11d21cac59e9c1b1d209795d3194710ee73e77bf
       - type: patch
         paths:
           - patches/RawTherapee-appdata.patch
           - patches/RawTherapee-mime.patch
-          - patches/0001-Fix-read-before-initialize-of-options.rtSettings.srg.patch
-          - patches/0002-Use-Meyer-s-singleton-for-default-cmp.patch
-          - patches/0003-Group-extern-variables-into-App-singleton.patch
-          - patches/0004-Fix-recursive-init-and-build-issues.patch
       # Allow to use GIMP from the host as an external tool to edit photos
       - type: script
         commands:
