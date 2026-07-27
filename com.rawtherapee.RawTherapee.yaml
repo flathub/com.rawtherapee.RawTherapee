@@ -1,7 +1,7 @@
 app-id: com.rawtherapee.RawTherapee
-runtime: org.gnome.Platform
-runtime-version: '50'
-sdk: org.gnome.Sdk
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
 command: rawtherapee
 rename-desktop-file: rawtherapee.desktop
 rename-icon: rawtherapee
@@ -170,6 +170,8 @@ modules:
       - type: archive
         url: https://github.com/ianw/libiptcdata/archive/release_1_0_5.tar.gz
         sha256: 78a5c49b646cb610c84bc4dfc730caad9a06e9b4e295600908782f4abb25316e
+      - type: patch
+        path: patches/libiptcdata-no-gtkdoc.patch
       - type: shell
         commands:
           - cp -p /usr/share/automake-*/config.{sub,guess} .;
